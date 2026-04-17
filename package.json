@@ -1,6 +1,6 @@
 {
   "name": "truelayer-bank-client",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Production-grade TypeScript client for the TrueLayer open banking API",
   "author": "iamkanishka",
   "license": "MIT",
