@@ -1,25 +1,41 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import globals from "globals";
 
 export default [
+  // Ignore patterns
   {
     ignores: ["dist/", "node_modules/", "coverage/", "*.js", "*.cjs", "*.mjs"],
   },
 
-  // Base JS rules
+  // Base ESLint recommended
   js.configs.recommended,
 
-  // TypeScript for src
-  ...tseslint.config({
+  // Source files (src/**/*.ts)
+  {
     files: ["src/**/*.ts"],
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
         project: "./tsconfig.json",
         ecmaVersion: "latest",
         sourceType: "module",
       },
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
+      // Disable base rules that conflict with TypeScript
+      "no-unused-vars": "off",
+      "no-undef": "off",
+
+      // TypeScript recommended rules (manually added since flat config doesn't support extends)
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -33,18 +49,30 @@ export default [
       "no-constant-condition": "error",
       "no-console": "warn",
     },
-  }),
+  },
 
-  // TypeScript for tests
-  ...tseslint.config({
+  // Test files (test/**/*.ts)
+  {
     files: ["test/**/*.ts"],
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
       },
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+        ...globals.vitest, // Vitest globals (describe, it, expect, etc.)
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
+      "no-unused-vars": "off",
+      "no-undef": "off",
+
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -53,5 +81,5 @@ export default [
       "@typescript-eslint/no-non-null-assertion": "off",
       "no-console": "off",
     },
-  }),
+  },
 ];
