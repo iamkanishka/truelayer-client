@@ -17,22 +17,15 @@ export interface Token {
 }
 
 /** Build a Token from a raw OAuth2 response with a 30-second expiry buffer. */
-export function tokenFromResponse(
-  resp: Record<string, unknown>,
-  tokenType: TokenType,
-): Token {
-  const expiresIn =
-    typeof resp["expires_in"] === "number" ? resp["expires_in"] : 3600;
+export function tokenFromResponse(resp: Record<string, unknown>, tokenType: TokenType): Token {
+  const expiresIn = typeof resp["expires_in"] === "number" ? resp["expires_in"] : 3600;
   const expiresAt = new Date(Date.now() + (expiresIn - 30) * 1000);
 
   const scopeStr = typeof resp["scope"] === "string" ? resp["scope"] : "";
 
   return {
     accessToken: resp["access_token"] as string,
-    refreshToken:
-      typeof resp["refresh_token"] === "string"
-        ? resp["refresh_token"]
-        : undefined,
+    refreshToken: typeof resp["refresh_token"] === "string" ? resp["refresh_token"] : undefined,
     tokenType,
     scopes: scopeStr ? scopeStr.split(" ") : [],
     expiresAt,

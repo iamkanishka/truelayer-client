@@ -20,10 +20,7 @@ export const DEFAULT_RETRY_POLICY: RetryPolicy = {
  * Retries only when `TruelayerError.isRetryable` is true.
  * Uses `globalThis.crypto.getRandomValues` for timing-safe jitter.
  */
-export async function withRetry<T>(
-  policy: RetryPolicy,
-  fn: () => Promise<T>,
-): Promise<T> {
+export async function withRetry<T>(policy: RetryPolicy, fn: () => Promise<T>): Promise<T> {
   let delay = policy.baseDelayMs;
 
   for (let attempt = 1; attempt <= policy.maxAttempts; attempt++) {
@@ -48,7 +45,7 @@ function cryptoJitter(maxMs: number): number {
   if (maxMs <= 0) return 0;
   const buf = new Uint32Array(1);
   globalThis.crypto.getRandomValues(buf);
-  return (buf[0]! % maxMs);
+  return buf[0]! % maxMs;
 }
 
 function sleep(ms: number): Promise<void> {

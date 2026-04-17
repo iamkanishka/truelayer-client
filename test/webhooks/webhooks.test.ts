@@ -32,10 +32,16 @@ function makeBody(eventType: string, payload: Record<string, unknown> = {}): str
 async function signBody(body: string, timestamp: string, secret: string): Promise<string> {
   const payload = `${timestamp}.${body}`;
   const key = await globalThis.crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
   );
   const mac = await globalThis.crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
-  return Array.from(new Uint8Array(mac)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(mac))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 describe("WebhookEvents constants", () => {
@@ -77,7 +83,9 @@ describe("WebhooksClient signature verification", () => {
     const original = makeBody(WebhookEvents.PAYMENT_EXECUTED, { payment_id: "pay_001" });
     const sig = await signBody(original, ts, SECRET);
     const tampered = makeBody(WebhookEvents.PAYMENT_EXECUTED, { payment_id: "pay_EVIL" });
-    await expect(client.process(tampered, sig, ts)).rejects.toMatchObject({ type: "signature_invalid" });
+    await expect(client.process(tampered, sig, ts)).rejects.toMatchObject({
+      type: "signature_invalid",
+    });
   });
 
   it("skips verification when no secret configured", async () => {
@@ -110,7 +118,9 @@ describe("WebhooksClient dispatch", () => {
   it("dispatches event to registered handler", async () => {
     const client = makeClient();
     const received: WebhookEvent[] = [];
-    client.on(WebhookEvents.PAYMENT_EXECUTED, (event) => { received.push(event); });
+    client.on(WebhookEvents.PAYMENT_EXECUTED, (event) => {
+      received.push(event);
+    });
 
     const ts = freshTimestamp();
     const body = makeBody(WebhookEvents.PAYMENT_EXECUTED, { payment_id: "pay_abc" });
@@ -124,9 +134,15 @@ describe("WebhooksClient dispatch", () => {
   it("calls all handlers for same event type in order", async () => {
     const client = makeClient();
     const order: number[] = [];
-    client.on(WebhookEvents.PAYMENT_SETTLED, () => { order.push(1); });
-    client.on(WebhookEvents.PAYMENT_SETTLED, () => { order.push(2); });
-    client.on(WebhookEvents.PAYMENT_SETTLED, () => { order.push(3); });
+    client.on(WebhookEvents.PAYMENT_SETTLED, () => {
+      order.push(1);
+    });
+    client.on(WebhookEvents.PAYMENT_SETTLED, () => {
+      order.push(2);
+    });
+    client.on(WebhookEvents.PAYMENT_SETTLED, () => {
+      order.push(3);
+    });
 
     const ts = freshTimestamp();
     const body = makeBody(WebhookEvents.PAYMENT_SETTLED);
@@ -138,7 +154,9 @@ describe("WebhooksClient dispatch", () => {
   it("calls fallback for unregistered event type", async () => {
     const client = makeClient();
     const seen: string[] = [];
-    client.onFallback((e) => { seen.push(e.event_type); });
+    client.onFallback((e) => {
+      seen.push(e.event_type);
+    });
 
     const ts = freshTimestamp();
     const body = makeBody("brand_new_event_2099");
@@ -158,7 +176,9 @@ describe("WebhooksClient dispatch", () => {
   it("propagates handler error and stops dispatch", async () => {
     const client = makeClient();
     const secondCalled = vi.fn();
-    client.on(WebhookEvents.PAYMENT_FAILED, async () => { throw new Error("handler-error"); });
+    client.on(WebhookEvents.PAYMENT_FAILED, async () => {
+      throw new Error("handler-error");
+    });
     client.on(WebhookEvents.PAYMENT_FAILED, secondCalled);
 
     const ts = freshTimestamp();

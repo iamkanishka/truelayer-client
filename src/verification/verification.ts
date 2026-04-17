@@ -29,7 +29,7 @@ export class VerificationClient {
   constructor(
     private readonly config: Config,
     private readonly auth: AuthClient,
-    ) {}
+  ) {}
 
   async verifyAccountHolderName(params: VerifyNameRequest): Promise<VerifyNameResponse> {
     if (!params.account_holder_name) {
@@ -56,12 +56,19 @@ export class VerificationClient {
 
   async getAccountHolderVerification(verificationId: string): Promise<AHVResource> {
     const token = await this.auth.clientCredentials(DATA_SCOPES, "data");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<AHVResource>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/verification/account-holder/${verificationId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<AHVResource>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/verification/account-holder/${verificationId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 }

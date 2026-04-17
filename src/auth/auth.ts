@@ -68,9 +68,7 @@ export class AuthClient {
       throw TruelayerError.validation("state is required for CSRF protection");
     }
     if (!this.config.redirectUri) {
-      throw TruelayerError.validation(
-        "redirectUri is required for authorization-code flows",
-      );
+      throw TruelayerError.validation("redirectUri is required for authorization-code flows");
     }
 
     const params = new URLSearchParams({
@@ -120,10 +118,7 @@ export class AuthClient {
    * Obtain a client-credentials token (server-to-server, no user interaction).
    * Results are cached; a fresh token is fetched only when the cached one expires.
    */
-  async clientCredentials(
-    scopes: readonly string[],
-    tokenType: TokenType,
-  ): Promise<Token> {
+  async clientCredentials(scopes: readonly string[], tokenType: TokenType): Promise<Token> {
     const cached = await this.store.get(this.storeId, tokenType);
     if (cached !== null && !isExpired(cached)) return cached;
 

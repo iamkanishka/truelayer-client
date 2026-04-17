@@ -48,24 +48,41 @@ export class PayoutsClient {
     const bodyStr = JSON.stringify(params);
     const sig = await this.signer.sign("POST", path, headers, bodyStr);
 
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Payout>(this.config, {
-        method: "POST",
-        url: `${this.config.apiUrl}${path}`,
-        headers: { ...headers, "Tl-Signature": sig },
-        body: params,
-      }),
-    ).then((r) => { this.idem.release(operationId); return r; });
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Payout>(this.config, {
+          method: "POST",
+          url: `${this.config.apiUrl}${path}`,
+          headers: { ...headers, "Tl-Signature": sig },
+          body: params,
+        }),
+    ).then((r) => {
+      this.idem.release(operationId);
+      return r;
+    });
   }
 
   async getPayout(payoutId: string): Promise<Payout> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Payout>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payouts/${payoutId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Payout>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payouts/${payoutId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 }

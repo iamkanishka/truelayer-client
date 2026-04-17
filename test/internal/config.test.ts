@@ -20,22 +20,26 @@ describe("buildConfig", () => {
   });
 
   it("throws on missing clientId", () => {
-    expect(() => buildConfig({ clientId: "", clientSecret: "s" }))
-      .toThrow(TruelayerError);
+    expect(() => buildConfig({ clientId: "", clientSecret: "s" })).toThrow(TruelayerError);
   });
 
   it("throws on missing clientSecret", () => {
-    expect(() => buildConfig({ clientId: "id", clientSecret: "" }))
-      .toThrow(TruelayerError);
+    expect(() => buildConfig({ clientId: "id", clientSecret: "" })).toThrow(TruelayerError);
   });
 
   it("throws on invalid environment", () => {
-    expect(() => buildConfig({ ...base, environment: "staging" as "live" }))
-      .toThrow(TruelayerError);
+    expect(() => buildConfig({ ...base, environment: "staging" as "live" })).toThrow(
+      TruelayerError,
+    );
   });
 
   it("applies custom options", () => {
-    const cfg = buildConfig({ ...base, maxRetries: 5, requestTimeoutMs: 60_000, baseRetryDelayMs: 500 });
+    const cfg = buildConfig({
+      ...base,
+      maxRetries: 5,
+      requestTimeoutMs: 60_000,
+      baseRetryDelayMs: 500,
+    });
     expect(cfg.maxRetries).toBe(5);
     expect(cfg.requestTimeoutMs).toBe(60_000);
     expect(cfg.baseRetryDelayMs).toBe(500);

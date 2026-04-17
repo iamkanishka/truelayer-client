@@ -79,25 +79,33 @@ export class DataClient {
   constructor(
     private readonly config: Config,
     private readonly auth: AuthClient,
-    ) {}
+  ) {}
 
   async getConnectionMeta(): Promise<Record<string, unknown>> {
     const token = await this.auth.validToken("data");
     const resp = await this.get<DataApiResponse<Record<string, unknown>>>(
-      token.accessToken, "/data/v1/me"
+      token.accessToken,
+      "/data/v1/me",
     );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "connection meta not found" });
+    if (!results[0])
+      throw new TruelayerError({
+        type: "not_found",
+        status: 404,
+        message: "connection meta not found",
+      });
     return results[0];
   }
 
   async getUserInfo(): Promise<Record<string, unknown>> {
     const token = await this.auth.validToken("data");
     const resp = await this.get<DataApiResponse<Record<string, unknown>>>(
-      token.accessToken, "/data/v1/info"
+      token.accessToken,
+      "/data/v1/info",
     );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "user info not found" });
+    if (!results[0])
+      throw new TruelayerError({ type: "not_found", status: 404, message: "user info not found" });
     return results[0];
   }
 
@@ -109,34 +117,50 @@ export class DataClient {
 
   async getAccount(accountId: string): Promise<Account> {
     const token = await this.auth.validToken("data");
-    const resp = await this.get<DataApiResponse<Account>>(token.accessToken, `/data/v1/accounts/${accountId}`);
+    const resp = await this.get<DataApiResponse<Account>>(
+      token.accessToken,
+      `/data/v1/accounts/${accountId}`,
+    );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "account not found" });
+    if (!results[0])
+      throw new TruelayerError({ type: "not_found", status: 404, message: "account not found" });
     return results[0];
   }
 
   async getAccountBalance(accountId: string): Promise<Balance> {
     const token = await this.auth.validToken("data");
-    const resp = await this.get<DataApiResponse<Balance>>(token.accessToken, `/data/v1/accounts/${accountId}/balance`);
+    const resp = await this.get<DataApiResponse<Balance>>(
+      token.accessToken,
+      `/data/v1/accounts/${accountId}/balance`,
+    );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "balance not found" });
+    if (!results[0])
+      throw new TruelayerError({ type: "not_found", status: 404, message: "balance not found" });
     return results[0];
   }
 
-  async getTransactions(accountId: string, opts: GetTransactionsOptions = {}): Promise<Transaction[]> {
+  async getTransactions(
+    accountId: string,
+    opts: GetTransactionsOptions = {},
+  ): Promise<Transaction[]> {
     const token = await this.auth.validToken("data");
     const qs = buildDateQs(opts);
     const resp = await this.get<DataApiResponse<Transaction>>(
-      token.accessToken, `/data/v1/accounts/${accountId}/transactions${qs}`
+      token.accessToken,
+      `/data/v1/accounts/${accountId}/transactions${qs}`,
     );
     return resp.results ?? [];
   }
 
-  async getPendingTransactions(accountId: string, opts: GetTransactionsOptions = {}): Promise<Transaction[]> {
+  async getPendingTransactions(
+    accountId: string,
+    opts: GetTransactionsOptions = {},
+  ): Promise<Transaction[]> {
     const token = await this.auth.validToken("data");
     const qs = buildDateQs(opts);
     const resp = await this.get<DataApiResponse<Transaction>>(
-      token.accessToken, `/data/v1/accounts/${accountId}/transactions/pending${qs}`
+      token.accessToken,
+      `/data/v1/accounts/${accountId}/transactions/pending${qs}`,
     );
     return resp.results ?? [];
   }
@@ -165,7 +189,8 @@ export class DataClient {
   async getStandingOrders(accountId: string): Promise<StandingOrder[]> {
     const token = await this.auth.validToken("data");
     const resp = await this.get<DataApiResponse<StandingOrder>>(
-      token.accessToken, `/data/v1/accounts/${accountId}/standing_orders`
+      token.accessToken,
+      `/data/v1/accounts/${accountId}/standing_orders`,
     );
     return resp.results ?? [];
   }
@@ -173,7 +198,8 @@ export class DataClient {
   async getDirectDebits(accountId: string): Promise<DirectDebit[]> {
     const token = await this.auth.validToken("data");
     const resp = await this.get<DataApiResponse<DirectDebit>>(
-      token.accessToken, `/data/v1/accounts/${accountId}/direct_debits`
+      token.accessToken,
+      `/data/v1/accounts/${accountId}/direct_debits`,
     );
     return resp.results ?? [];
   }
@@ -186,27 +212,41 @@ export class DataClient {
 
   async getCard(accountId: string): Promise<Card> {
     const token = await this.auth.validToken("data");
-    const resp = await this.get<DataApiResponse<Card>>(token.accessToken, `/data/v1/cards/${accountId}`);
+    const resp = await this.get<DataApiResponse<Card>>(
+      token.accessToken,
+      `/data/v1/cards/${accountId}`,
+    );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "card not found" });
+    if (!results[0])
+      throw new TruelayerError({ type: "not_found", status: 404, message: "card not found" });
     return results[0];
   }
 
   async getCardBalance(accountId: string): Promise<CardBalance> {
     const token = await this.auth.validToken("data");
     const resp = await this.get<DataApiResponse<CardBalance>>(
-      token.accessToken, `/data/v1/cards/${accountId}/balance`
+      token.accessToken,
+      `/data/v1/cards/${accountId}/balance`,
     );
     const results = resp.results ?? [];
-    if (!results[0]) throw new TruelayerError({ type: "not_found", status: 404, message: "card balance not found" });
+    if (!results[0])
+      throw new TruelayerError({
+        type: "not_found",
+        status: 404,
+        message: "card balance not found",
+      });
     return results[0];
   }
 
-  async getCardTransactions(accountId: string, opts: GetTransactionsOptions = {}): Promise<Transaction[]> {
+  async getCardTransactions(
+    accountId: string,
+    opts: GetTransactionsOptions = {},
+  ): Promise<Transaction[]> {
     const token = await this.auth.validToken("data");
     const qs = buildDateQs(opts);
     const resp = await this.get<DataApiResponse<Transaction>>(
-      token.accessToken, `/data/v1/cards/${accountId}/transactions${qs}`
+      token.accessToken,
+      `/data/v1/cards/${accountId}/transactions${qs}`,
     );
     return resp.results ?? [];
   }
@@ -218,12 +258,19 @@ export class DataClient {
   }
 
   private get<T>(accessToken: string, path: string): Promise<T> {
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<T>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}${path}`,
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<T>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}${path}`,
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
     );
   }
 }

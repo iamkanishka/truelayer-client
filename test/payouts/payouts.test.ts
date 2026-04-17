@@ -7,11 +7,24 @@ import { IdempotencyManager } from "../../src/idempotency.js";
 import { MemoryTokenStore } from "../../src/auth/token-store.js";
 import { tokenFromResponse } from "../../src/auth/token.js";
 
-const cfg = buildConfig({ clientId: "id", clientSecret: "s", environment: "sandbox", maxRetries: 1, baseRetryDelayMs: 1 });
+const cfg = buildConfig({
+  clientId: "id",
+  clientSecret: "s",
+  environment: "sandbox",
+  maxRetries: 1,
+  baseRetryDelayMs: 1,
+});
 
 async function makeClient() {
   const store = new MemoryTokenStore();
-  await store.put("sid", "payments", tokenFromResponse({ access_token: "tok", expires_in: 3600, token_type: "Bearer", scope: "payments" }, "payments"));
+  await store.put(
+    "sid",
+    "payments",
+    tokenFromResponse(
+      { access_token: "tok", expires_in: 3600, token_type: "Bearer", scope: "payments" },
+      "payments",
+    ),
+  );
   const auth = new AuthClient({ ...cfg, tokenStore: store }, "sid", store);
   return new PayoutsClient({ ...cfg, tokenStore: store }, auth, null, new IdempotencyManager());
 }
@@ -34,7 +47,19 @@ describe("PayoutsClient", () => {
   it("createPayout throws signing_required when no signer", async () => {
     const client = await makeClient();
     await expect(
-      client.createPayout({ merchant_account_id: "ma", amount_in_minor: 1000, currency: "GBP", beneficiary: { type: "external_account", account_holder_name: "Jane", account_identifier: { type: "iban", iban: "GB29NWBK" } } }, "op"),
+      client.createPayout(
+        {
+          merchant_account_id: "ma",
+          amount_in_minor: 1000,
+          currency: "GBP",
+          beneficiary: {
+            type: "external_account",
+            account_holder_name: "Jane",
+            account_identifier: { type: "iban", iban: "GB29NWBK" },
+          },
+        },
+        "op",
+      ),
     ).rejects.toMatchObject({ type: "signing_required" });
   });
 });

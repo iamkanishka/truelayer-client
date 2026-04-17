@@ -61,28 +61,18 @@ export type {
 
 // ── Merchant ──────────────────────────────────────────────────────────────────
 export { MerchantClient } from "./merchant/merchant.js";
-export type {
-  MerchantAccount,
-  MerchantTransaction,
-  SweepingConfig,
-} from "./merchant/merchant.js";
+export type { MerchantAccount, MerchantTransaction, SweepingConfig } from "./merchant/merchant.js";
 
 // ── Mandates ──────────────────────────────────────────────────────────────────
 export { MandatesClient } from "./mandates/mandates.js";
-export type {
-  CreateMandateRequest,
-  Mandate,
-  MandateStatus,
-} from "./mandates/mandates.js";
+export type { CreateMandateRequest, Mandate, MandateStatus } from "./mandates/mandates.js";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 export { DataClient } from "./data/data.js";
 
 // ── Verification ──────────────────────────────────────────────────────────────
 export { VerificationClient } from "./verification/verification.js";
-export type {
-  VerifyNameRequest,
-} from "./verification/verification.js";
+export type { VerifyNameRequest } from "./verification/verification.js";
 
 // ── Signup+ ───────────────────────────────────────────────────────────────────
 export { SignupPlusClient } from "./signup-plus/signup-plus.js";
@@ -92,11 +82,7 @@ export { TrackingClient } from "./tracking/tracking.js";
 
 // ── Webhooks ──────────────────────────────────────────────────────────────────
 export { WebhooksClient, WebhookEvents } from "./webhooks/webhooks.js";
-export type {
-  WebhookEvent,
-  WebhookEventType,
-  WebhookHandler,
-} from "./webhooks/webhooks.js";
+export type { WebhookEvent, WebhookEventType, WebhookHandler } from "./webhooks/webhooks.js";
 
 // ── Internals (useful for custom implementations) ─────────────────────────────
 export { IdempotencyManager } from "./idempotency.js";

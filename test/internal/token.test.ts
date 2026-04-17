@@ -53,7 +53,10 @@ describe("isExpired", () => {
   });
 
   it("returns true when expiresAt is in the past", () => {
-    const tok = { ...tokenFromResponse(BASE_RESP, "payments"), expiresAt: new Date(Date.now() - 1000) };
+    const tok = {
+      ...tokenFromResponse(BASE_RESP, "payments"),
+      expiresAt: new Date(Date.now() - 1000),
+    };
     expect(isExpired(tok)).toBe(true);
   });
 });

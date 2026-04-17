@@ -10,7 +10,13 @@ describe("TruelayerError", () => {
   });
 
   it("formats API error message", () => {
-    const err = new TruelayerError({ type: "not_found", status: 404, title: "Not Found", detail: "gone", traceId: "trace-1" });
+    const err = new TruelayerError({
+      type: "not_found",
+      status: 404,
+      title: "Not Found",
+      detail: "gone",
+      traceId: "trace-1",
+    });
     expect(err.message).toContain("404");
     expect(err.message).toContain("Not Found");
     expect(err.message).toContain("trace-1");
@@ -53,7 +59,9 @@ describe("TruelayerError", () => {
 
   describe("predicates", () => {
     it("isRetryable is true for network_error", () => {
-      expect(new TruelayerError({ type: "network_error", shouldRetry: true }).isRetryable).toBe(true);
+      expect(new TruelayerError({ type: "network_error", shouldRetry: true }).isRetryable).toBe(
+        true,
+      );
     });
 
     it("isRetryable is true for 429, 500, 503", () => {

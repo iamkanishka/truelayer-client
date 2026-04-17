@@ -19,10 +19,7 @@ export interface Signer {
  * @param pemKey  PEM-encoded PKCS8 EC private key (secp521r1)
  * @param keyId   Key ID registered in the TrueLayer Console
  */
-export async function createSigner(
-  pemKey: string,
-  keyId: string,
-): Promise<Signer> {
+export async function createSigner(pemKey: string, keyId: string): Promise<Signer> {
   if (!pemKey || pemKey.trim() === "") {
     throw TruelayerError.validation("signingKeyPem must not be empty");
   }
@@ -57,13 +54,9 @@ export async function createSigner(
         iat: Math.floor(Date.now() / 1000),
       });
 
-      const encodedHeader = base64UrlEncode(
-        new TextEncoder().encode(jwsHeaderJson),
-      );
+      const encodedHeader = base64UrlEncode(new TextEncoder().encode(jwsHeaderJson));
 
-      const signingInput = [method.toUpperCase(), path, ...headerLines, body].join(
-        "\n",
-      );
+      const signingInput = [method.toUpperCase(), path, ...headerLines, body].join("\n");
 
       const toSign = `${encodedHeader}.${signingInput}`;
       const digest = await globalThis.crypto.subtle.digest(
@@ -108,8 +101,8 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
       type: "validation_error",
       message:
         "Failed to import signing key. Ensure it is a PEM-encoded PKCS8 EC private key (P-521). " +
-        'Generate with: openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-521 | ' +
-        'openssl pkcs8 -nocrypt -out signing_key.pem',
+        "Generate with: openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-521 | " +
+        "openssl pkcs8 -nocrypt -out signing_key.pem",
     });
   }
 }

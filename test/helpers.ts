@@ -12,12 +12,7 @@ export function mockFetch(
   });
   const bodyStr = typeof body === "string" ? body : JSON.stringify(body);
 
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(bodyStr, { status, headers }),
-    ),
-  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(bodyStr, { status, headers })));
 }
 
 /** Stub globalThis.fetch to return a sequence of responses (cycles last if exhausted). */
@@ -31,7 +26,9 @@ export function mockFetchSequence(
       const r = idx < responses.length ? responses[idx]! : responses[responses.length - 1]!;
       idx++;
       const h = new Headers({ "Content-Type": "application/json", ...(r.headers ?? {}) });
-      return Promise.resolve(new Response(JSON.stringify(r.body), { status: r.status, headers: h }));
+      return Promise.resolve(
+        new Response(JSON.stringify(r.body), { status: r.status, headers: h }),
+      );
     }),
   );
 }

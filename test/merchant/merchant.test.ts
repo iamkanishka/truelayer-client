@@ -6,18 +6,33 @@ import { MerchantClient } from "../../src/merchant/merchant.js";
 import { MemoryTokenStore } from "../../src/auth/token-store.js";
 import { tokenFromResponse } from "../../src/auth/token.js";
 
-const cfg = buildConfig({ clientId: "id", clientSecret: "s", environment: "sandbox", maxRetries: 1, baseRetryDelayMs: 1 });
+const cfg = buildConfig({
+  clientId: "id",
+  clientSecret: "s",
+  environment: "sandbox",
+  maxRetries: 1,
+  baseRetryDelayMs: 1,
+});
 
 async function makeClient() {
   const store = new MemoryTokenStore();
-  await store.put("sid", "payments", tokenFromResponse({ access_token: "tok", expires_in: 3600, token_type: "Bearer", scope: "payments" }, "payments"));
+  await store.put(
+    "sid",
+    "payments",
+    tokenFromResponse(
+      { access_token: "tok", expires_in: 3600, token_type: "Bearer", scope: "payments" },
+      "payments",
+    ),
+  );
   const auth = new AuthClient({ ...cfg, tokenStore: store }, "sid", store);
   return new MerchantClient({ ...cfg, tokenStore: store }, auth);
 }
 
 describe("MerchantClient", () => {
   it("listAccounts returns array", async () => {
-    mockFetch(200, { items: [{ id: "ma-001", currency: "GBP", available_balance_in_minor: 100_000 }] });
+    mockFetch(200, {
+      items: [{ id: "ma-001", currency: "GBP", available_balance_in_minor: 100_000 }],
+    });
     const client = await makeClient();
     const accounts = await client.listAccounts();
     expect(accounts).toHaveLength(1);
@@ -39,10 +54,16 @@ describe("MerchantClient", () => {
 
   it("getTransactions passes query params", async () => {
     let capturedUrl = "";
-    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (url: string) => {
-      capturedUrl = url as string;
-      return new Response(JSON.stringify({ items: [] }), { status: 200, headers: new Headers({ "Content-Type": "application/json" }) });
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (url: string) => {
+        capturedUrl = url as string;
+        return new Response(JSON.stringify({ items: [] }), {
+          status: 200,
+          headers: new Headers({ "Content-Type": "application/json" }),
+        });
+      }),
+    );
     const client = await makeClient();
     await client.getTransactions("ma-001", { type: "payout", from: "2024-01-01" });
     expect(capturedUrl).toContain("type=payout");
@@ -52,7 +73,11 @@ describe("MerchantClient", () => {
   it("setupSweeping returns config", async () => {
     mockFetch(200, { max_amount_in_minor: 100_000, currency: "GBP", frequency: "daily" });
     const client = await makeClient();
-    const cfg2 = await client.setupSweeping("ma-001", { max_amount_in_minor: 100_000, currency: "GBP", frequency: "daily" });
+    const cfg2 = await client.setupSweeping("ma-001", {
+      max_amount_in_minor: 100_000,
+      currency: "GBP",
+      frequency: "daily",
+    });
     expect(cfg2.frequency).toBe("daily");
   });
 

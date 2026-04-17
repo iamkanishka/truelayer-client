@@ -8,8 +8,11 @@ import type { Config } from "../config.js";
 import type { Signer } from "../signing.js";
 
 export type MandateStatus =
-  | "authorization_required" | "authorizing" | "authorized"
-  | "revoked" | "failed";
+  | "authorization_required"
+  | "authorizing"
+  | "authorized"
+  | "revoked"
+  | "failed";
 
 export interface CreateMandateRequest {
   mandate_type: string;
@@ -56,29 +59,46 @@ export class MandatesClient {
       url: `${this.config.apiUrl}${path}`,
       headers: { ...headers, "Tl-Signature": sig },
       body: params,
-    }).then((r) => { this.idem.release(operationId); return r; });
+    }).then((r) => {
+      this.idem.release(operationId);
+      return r;
+    });
   }
 
   async listMandates(cursor?: string): Promise<{ items?: Mandate[]; next?: string }> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
     const suffix = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/mandates${suffix}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/mandates${suffix}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
   async getMandate(mandateId: string): Promise<Mandate> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Mandate>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/mandates/${mandateId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Mandate>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/mandates/${mandateId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
@@ -132,12 +152,19 @@ export class MandatesClient {
 
   async getConstraints(mandateId: string): Promise<unknown> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/mandates/${mandateId}/constraints`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/mandates/${mandateId}/constraints`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 }

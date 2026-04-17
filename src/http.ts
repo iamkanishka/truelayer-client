@@ -24,10 +24,7 @@ export interface RequestOptions {
  * - Throws `TruelayerError` with `type: "network_error"` for transport failures.
  * - Emits a telemetry event after every request via `config.onRequest`.
  */
-export async function jsonRequest<T = unknown>(
-  config: Config,
-  opts: RequestOptions,
-): Promise<T> {
+export async function jsonRequest<T = unknown>(config: Config, opts: RequestOptions): Promise<T> {
   const headers: Record<string, string> = {
     Accept: "application/json",
     "User-Agent": "truelayer-client-ts/1.0.0",
@@ -76,10 +73,7 @@ export async function jsonRequest<T = unknown>(
   });
 
   if (response.status >= 200 && response.status < 300) {
-    if (
-      response.status === 204 ||
-      response.headers.get("content-length") === "0"
-    ) {
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
       return undefined as unknown as T;
     }
     const text = await response.text();

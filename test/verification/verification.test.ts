@@ -42,7 +42,11 @@ describe("VerificationClient", () => {
     const client = await makeClient();
     const result = await client.verifyAccountHolderName({
       account_holder_name: "Jane Doe",
-      account_identifier: { type: "sort_code_account_number", sort_code: "040004", account_number: "12345678" },
+      account_identifier: {
+        type: "sort_code_account_number",
+        sort_code: "040004",
+        account_number: "12345678",
+      },
     });
     expect(result.result).toBe("match");
   });

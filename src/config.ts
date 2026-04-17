@@ -71,16 +71,12 @@ export function buildConfig(opts: ClientOptions): Config {
     throw TruelayerError.validation("clientId is required and must not be empty");
   }
   if (!opts.clientSecret || opts.clientSecret.trim() === "") {
-    throw TruelayerError.validation(
-      "clientSecret is required and must not be empty",
-    );
+    throw TruelayerError.validation("clientSecret is required and must not be empty");
   }
 
   const env: Environment = opts.environment ?? "sandbox";
   if (!(env in ENV_URLS)) {
-    throw TruelayerError.validation(
-      `environment must be "sandbox" or "live", got: "${env}"`,
-    );
+    throw TruelayerError.validation(`environment must be "sandbox" or "live", got: "${env}"`);
   }
 
   const urls = ENV_URLS[env];

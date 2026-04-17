@@ -14,7 +14,8 @@ describe("withRetry", () => {
     let calls = 0;
     const result = await withRetry(FAST, async () => {
       calls++;
-      if (calls < 3) throw new TruelayerError({ type: "server_error", status: 503, shouldRetry: true });
+      if (calls < 3)
+        throw new TruelayerError({ type: "server_error", status: 503, shouldRetry: true });
       return "done";
     });
     expect(result).toBe("done");

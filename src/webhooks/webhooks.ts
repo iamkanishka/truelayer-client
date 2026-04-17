@@ -92,11 +92,7 @@ export class WebhooksClient {
    * @throws `TruelayerError` with `type: "signature_invalid"` on bad signature
    * @throws `TruelayerError` with `type: "replay_attack"` for stale events
    */
-  async process(
-    body: string,
-    signature: string | null,
-    timestamp: string | null,
-  ): Promise<void> {
+  async process(body: string, signature: string | null, timestamp: string | null): Promise<void> {
     await this.verifySignature(body, signature, timestamp);
     this.checkReplay(timestamp);
 

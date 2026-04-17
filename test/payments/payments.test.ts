@@ -62,7 +62,10 @@ describe("PaymentsClient.createPayment", () => {
   it("throws signing_required when no signer configured", async () => {
     const client = await makeClient();
     await expect(
-      client.createPayment({ amount_in_minor: 1000, currency: "GBP", payment_method: {} as never, user: {} }, "op-001"),
+      client.createPayment(
+        { amount_in_minor: 1000, currency: "GBP", payment_method: {} as never, user: {} },
+        "op-001",
+      ),
     ).rejects.toMatchObject({ type: "signing_required" });
   });
 });
@@ -70,7 +73,9 @@ describe("PaymentsClient.createPayment", () => {
 describe("PaymentsClient.cancelPayment", () => {
   it("throws signing_required when no signer configured", async () => {
     const client = await makeClient();
-    await expect(client.cancelPayment("pay_001")).rejects.toMatchObject({ type: "signing_required" });
+    await expect(client.cancelPayment("pay_001")).rejects.toMatchObject({
+      type: "signing_required",
+    });
   });
 });
 
@@ -78,10 +83,14 @@ describe("PaymentsClient.startAuthorizationFlow", () => {
   it("returns flow response", async () => {
     mockFetch(200, {
       status: "authorizing",
-      authorization_flow: { actions: { next: { type: "redirect", uri: "https://bank.example.com" } } },
+      authorization_flow: {
+        actions: { next: { type: "redirect", uri: "https://bank.example.com" } },
+      },
     });
     const client = await makeClient();
-    const result = await client.startAuthorizationFlow("pay_001", { redirect: { return_uri: "https://app.com" } });
+    const result = await client.startAuthorizationFlow("pay_001", {
+      redirect: { return_uri: "https://app.com" },
+    });
     expect(result).toMatchObject({ status: "authorizing" });
   });
 });
@@ -89,13 +98,16 @@ describe("PaymentsClient.startAuthorizationFlow", () => {
 describe("PaymentsClient.submitProviderSelection", () => {
   it("posts provider_id", async () => {
     let capturedBody: Record<string, unknown> | null = null;
-    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (_url: string, init?: RequestInit) => {
-      capturedBody = JSON.parse(init?.body as string) as Record<string, unknown>;
-      return new Response(JSON.stringify({ status: "authorizing" }), {
-        status: 200,
-        headers: new Headers({ "Content-Type": "application/json" }),
-      });
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (_url: string, init?: RequestInit) => {
+        capturedBody = JSON.parse(init?.body as string) as Record<string, unknown>;
+        return new Response(JSON.stringify({ status: "authorizing" }), {
+          status: 200,
+          headers: new Headers({ "Content-Type": "application/json" }),
+        });
+      }),
+    );
     const client = await makeClient();
     await client.submitProviderSelection("pay_001", "ob-monzo");
     expect(capturedBody?.provider_id).toBe("ob-monzo");
@@ -104,7 +116,12 @@ describe("PaymentsClient.submitProviderSelection", () => {
 
 describe("PaymentsClient.listRefunds", () => {
   it("returns refund array", async () => {
-    mockFetch(200, { items: [{ id: "ref_001", status: "executed" }, { id: "ref_002", status: "pending" }] });
+    mockFetch(200, {
+      items: [
+        { id: "ref_001", status: "executed" },
+        { id: "ref_002", status: "pending" },
+      ],
+    });
     const client = await makeClient();
     const refunds = await client.listRefunds("pay_001");
     expect(refunds).toHaveLength(2);
@@ -124,7 +141,11 @@ describe("PaymentsClient.getRefund", () => {
 
 describe("PaymentsClient.getPaymentLink", () => {
   it("returns payment link", async () => {
-    mockFetch(200, { id: "link_001", link: "https://pay.truelayer.com/link_001", status: "active" });
+    mockFetch(200, {
+      id: "link_001",
+      link: "https://pay.truelayer.com/link_001",
+      status: "active",
+    });
     const client = await makeClient();
     const link = await client.getPaymentLink("link_001");
     expect(link.id).toBe("link_001");
@@ -134,7 +155,12 @@ describe("PaymentsClient.getPaymentLink", () => {
 
 describe("PaymentsClient.searchProviders", () => {
   it("returns provider list", async () => {
-    mockFetch(200, { providers: [{ id: "ob-monzo", display_name: "Monzo" }, { id: "ob-revolut", display_name: "Revolut" }] });
+    mockFetch(200, {
+      providers: [
+        { id: "ob-monzo", display_name: "Monzo" },
+        { id: "ob-revolut", display_name: "Revolut" },
+      ],
+    });
     const client = await makeClient();
     const result = await client.searchProviders({ countries: ["GB"] });
     expect(result.providers).toHaveLength(2);

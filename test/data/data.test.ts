@@ -6,18 +6,36 @@ import { DataClient } from "../../src/data/data.js";
 import { MemoryTokenStore } from "../../src/auth/token-store.js";
 import { tokenFromResponse } from "../../src/auth/token.js";
 
-const cfg = buildConfig({ clientId: "id", clientSecret: "s", environment: "sandbox", maxRetries: 1, baseRetryDelayMs: 1 });
+const cfg = buildConfig({
+  clientId: "id",
+  clientSecret: "s",
+  environment: "sandbox",
+  maxRetries: 1,
+  baseRetryDelayMs: 1,
+});
 
 async function makeClient() {
   const store = new MemoryTokenStore();
-  await store.put("sid", "data", tokenFromResponse({ access_token: "data-tok", expires_in: 3600, token_type: "Bearer", scope: "accounts" }, "data"));
+  await store.put(
+    "sid",
+    "data",
+    tokenFromResponse(
+      { access_token: "data-tok", expires_in: 3600, token_type: "Bearer", scope: "accounts" },
+      "data",
+    ),
+  );
   const auth = new AuthClient({ ...cfg, tokenStore: store }, "sid", store);
   return new DataClient({ ...cfg, tokenStore: store }, auth);
 }
 
 describe("DataClient", () => {
   it("listAccounts returns array", async () => {
-    mockFetch(200, { results: [{ account_id: "acc-001", currency: "GBP" }, { account_id: "acc-002", currency: "GBP" }] });
+    mockFetch(200, {
+      results: [
+        { account_id: "acc-001", currency: "GBP" },
+        { account_id: "acc-002", currency: "GBP" },
+      ],
+    });
     const client = await makeClient();
     const accounts = await client.listAccounts();
     expect(accounts).toHaveLength(2);
@@ -26,7 +44,7 @@ describe("DataClient", () => {
   it("getAccount returns single account", async () => {
     mockFetch(200, { results: [{ account_id: "acc-001", currency: "GBP" }] });
     const client = await makeClient();
-    const account = await client.getAccount("acc-001") as { account_id: string };
+    const account = (await client.getAccount("acc-001")) as { account_id: string };
     expect(account.account_id).toBe("acc-001");
   });
 
@@ -37,14 +55,19 @@ describe("DataClient", () => {
   });
 
   it("getAccountBalance returns balance", async () => {
-    mockFetch(200, { results: [{ available: 100.50, current: 100.50, currency: "GBP" }] });
+    mockFetch(200, { results: [{ available: 100.5, current: 100.5, currency: "GBP" }] });
     const client = await makeClient();
-    const bal = await client.getAccountBalance("acc-001") as { currency: string };
+    const bal = (await client.getAccountBalance("acc-001")) as { currency: string };
     expect(bal.currency).toBe("GBP");
   });
 
   it("getTransactions returns array of transactions", async () => {
-    mockFetch(200, { results: [{ transaction_id: "t1", amount: -10.0 }, { transaction_id: "t2", amount: 500.0 }] });
+    mockFetch(200, {
+      results: [
+        { transaction_id: "t1", amount: -10.0 },
+        { transaction_id: "t2", amount: 500.0 },
+      ],
+    });
     const client = await makeClient();
     const txns = await client.getTransactions("acc-001");
     expect(txns).toHaveLength(2);
@@ -52,18 +75,29 @@ describe("DataClient", () => {
 
   it("getTransactions passes from/to as query params", async () => {
     let capturedUrl = "";
-    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (url: string) => {
-      capturedUrl = url as string;
-      return new Response(JSON.stringify({ results: [] }), { status: 200, headers: new Headers({ "Content-Type": "application/json" }) });
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (url: string) => {
+        capturedUrl = url as string;
+        return new Response(JSON.stringify({ results: [] }), {
+          status: 200,
+          headers: new Headers({ "Content-Type": "application/json" }),
+        });
+      }),
+    );
     const client = await makeClient();
-    await client.getTransactions("acc-001", { from: new Date("2024-01-01"), to: new Date("2024-03-31") });
+    await client.getTransactions("acc-001", {
+      from: new Date("2024-01-01"),
+      to: new Date("2024-03-31"),
+    });
     expect(capturedUrl).toContain("from=");
     expect(capturedUrl).toContain("to=");
   });
 
   it("transactionStream yields all transactions", async () => {
-    mockFetch(200, { results: [{ transaction_id: "t1" }, { transaction_id: "t2" }, { transaction_id: "t3" }] });
+    mockFetch(200, {
+      results: [{ transaction_id: "t1" }, { transaction_id: "t2" }, { transaction_id: "t3" }],
+    });
     const client = await makeClient();
     const collected: unknown[] = [];
     for await (const t of client.transactionStream("acc-001")) {
@@ -92,7 +126,7 @@ describe("DataClient", () => {
   it("getCardBalance returns card balance", async () => {
     mockFetch(200, { results: [{ current: -50.25, credit_limit: 1000.0, currency: "GBP" }] });
     const client = await makeClient();
-    const bal = await client.getCardBalance("card-001") as { currency: string };
+    const bal = (await client.getCardBalance("card-001")) as { currency: string };
     expect(bal.currency).toBe("GBP");
   });
 

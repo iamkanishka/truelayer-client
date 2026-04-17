@@ -50,7 +50,13 @@ describe("AuthClient.authLink", () => {
 
   it("includes optional params", () => {
     const auth = makeAuth();
-    const url = auth.authLink({ scopes: ["payments"], state: "s", nonce: "n1", providers: ["ob-monzo"], enableMock: true });
+    const url = auth.authLink({
+      scopes: ["payments"],
+      state: "s",
+      nonce: "n1",
+      providers: ["ob-monzo"],
+      enableMock: true,
+    });
     const parsed = new URL(url);
     expect(parsed.searchParams.get("nonce")).toBe("n1");
     expect(parsed.searchParams.get("providers")).toBe("ob-monzo");
@@ -60,7 +66,7 @@ describe("AuthClient.authLink", () => {
   it("throws when redirectUri not configured", () => {
     const cfg2 = buildConfig({ clientId: "id", clientSecret: "s" });
     const store2 = new MemoryTokenStore();
-  const auth = new AuthClient(cfg2, "sid", store2);
+    const auth = new AuthClient(cfg2, "sid", store2);
     expect(() => auth.authLink({ scopes: ["payments"], state: "s" })).toThrow(TruelayerError);
   });
 });
@@ -103,7 +109,10 @@ describe("AuthClient.clientCredentials", () => {
 
   it("refetches after token expires", async () => {
     const store = new MemoryTokenStore();
-    const expiredToken = tokenFromResponse({ access_token: "old", expires_in: 0, token_type: "Bearer", scope: "payments" }, "payments");
+    const expiredToken = tokenFromResponse(
+      { access_token: "old", expires_in: 0, token_type: "Bearer", scope: "payments" },
+      "payments",
+    );
     await store.put("store-001", "payments", expiredToken);
     const config = { ...cfg, tokenStore: store };
     const auth = new AuthClient(config, "store-001", store);
@@ -114,14 +123,20 @@ describe("AuthClient.clientCredentials", () => {
 
   it("isolates payments and data tokens", async () => {
     let scope = "";
-    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (_url: string, init?: RequestInit) => {
-      const body = new URLSearchParams(init?.body as string);
-      scope = body.get("scope") ?? "";
-      return new Response(JSON.stringify({ ...TOKEN_RESP, access_token: `tok-${scope}`, scope }), {
-        status: 200,
-        headers: new Headers({ "Content-Type": "application/json" }),
-      });
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (_url: string, init?: RequestInit) => {
+        const body = new URLSearchParams(init?.body as string);
+        scope = body.get("scope") ?? "";
+        return new Response(
+          JSON.stringify({ ...TOKEN_RESP, access_token: `tok-${scope}`, scope }),
+          {
+            status: 200,
+            headers: new Headers({ "Content-Type": "application/json" }),
+          },
+        );
+      }),
+    );
     const auth = makeAuth();
     const pt = await auth.clientCredentials([...PAYMENTS_SCOPES], "payments");
     const dt = await auth.clientCredentials([...DATA_SCOPES], "data");
@@ -158,7 +173,10 @@ describe("AuthClient.validToken", () => {
 
   it("throws for expired token without refresh_token", async () => {
     const store = new MemoryTokenStore();
-    const expired = tokenFromResponse({ access_token: "old", expires_in: 0, token_type: "Bearer" }, "data");
+    const expired = tokenFromResponse(
+      { access_token: "old", expires_in: 0, token_type: "Bearer" },
+      "data",
+    );
     await store.put("sid", "data", expired);
     const auth = new AuthClient({ ...cfg, tokenStore: store }, "sid", store);
     await expect(auth.validToken("data")).rejects.toBeInstanceOf(TruelayerError);

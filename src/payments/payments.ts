@@ -16,12 +16,7 @@ import type {
   Refund,
 } from "./types.js";
 
-const TERMINAL_STATUSES = new Set([
-  "executed",
-  "settled",
-  "failed",
-  "cancelled",
-]);
+const TERMINAL_STATUSES = new Set(["executed", "settled", "failed", "cancelled"]);
 
 export interface WaitOptions {
   timeoutMs?: number;
@@ -38,10 +33,7 @@ export class PaymentsClient {
 
   // ── Payments ────────────────────────────────────────────────────────────────
 
-  async createPayment(
-    params: CreatePaymentRequest,
-    operationId: string,
-  ): Promise<Payment> {
+  async createPayment(params: CreatePaymentRequest, operationId: string): Promise<Payment> {
     this.requireSigner();
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
     const path = "/v3/payments";
@@ -51,13 +43,20 @@ export class PaymentsClient {
     const sig = await this.signer!.sign("POST", path, headers, bodyStr);
     const signedHeaders = { ...headers, "Tl-Signature": sig };
 
-    return await withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Payment>(this.config, {
-        method: "POST",
-        url: `${this.config.apiUrl}${path}`,
-        headers: signedHeaders,
-        body: params,
-      }),
+    return await withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Payment>(this.config, {
+          method: "POST",
+          url: `${this.config.apiUrl}${path}`,
+          headers: signedHeaders,
+          body: params,
+        }),
     ).then((r) => {
       this.idem.release(operationId);
       return r;
@@ -66,12 +65,19 @@ export class PaymentsClient {
 
   async getPayment(paymentId: string): Promise<Payment> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Payment>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payments/${paymentId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Payment>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payments/${paymentId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
@@ -159,23 +165,37 @@ export class PaymentsClient {
 
   async getRefund(paymentId: string, refundId: string): Promise<Refund> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Refund>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payments/${paymentId}/refunds/${refundId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Refund>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payments/${paymentId}/refunds/${refundId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
   async listRefunds(paymentId: string): Promise<Refund[]> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    const resp = await withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<{ items?: Refund[] }>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payments/${paymentId}/refunds`,
-        headers: bearerHeaders(token),
-      }),
+    const resp = await withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<{ items?: Refund[] }>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payments/${paymentId}/refunds`,
+          headers: bearerHeaders(token),
+        }),
     );
     return resp.items ?? [];
   }
@@ -207,12 +227,19 @@ export class PaymentsClient {
 
   async getPaymentLink(linkId: string): Promise<PaymentLink> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<PaymentLink>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payment-links/${linkId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<PaymentLink>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payment-links/${linkId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
@@ -230,21 +257,25 @@ export class PaymentsClient {
 
   async getProvider(providerId: string): Promise<Provider> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
-    return withRetry({ maxAttempts: this.config.maxRetries, baseDelayMs: this.config.baseRetryDelayMs, maxDelayMs: 10_000, multiplier: 2 }, () =>
-      jsonRequest<Provider>(this.config, {
-        method: "GET",
-        url: `${this.config.apiUrl}/v3/payments-providers/${providerId}`,
-        headers: bearerHeaders(token),
-      }),
+    return withRetry(
+      {
+        maxAttempts: this.config.maxRetries,
+        baseDelayMs: this.config.baseRetryDelayMs,
+        maxDelayMs: 10_000,
+        multiplier: 2,
+      },
+      () =>
+        jsonRequest<Provider>(this.config, {
+          method: "GET",
+          url: `${this.config.apiUrl}/v3/payments-providers/${providerId}`,
+          headers: bearerHeaders(token),
+        }),
     );
   }
 
   // ── Polling ─────────────────────────────────────────────────────────────────
 
-  async waitForFinalStatus(
-    paymentId: string,
-    opts: WaitOptions = {},
-  ): Promise<Payment> {
+  async waitForFinalStatus(paymentId: string, opts: WaitOptions = {}): Promise<Payment> {
     const timeoutMs = opts.timeoutMs ?? 60_000;
     const intervalMs = opts.intervalMs ?? 2_000;
     const deadline = Date.now() + timeoutMs;
@@ -267,11 +298,7 @@ export class PaymentsClient {
 
   // ── Private ─────────────────────────────────────────────────────────────────
 
-  private async postFlowAction(
-    paymentId: string,
-    action: string,
-    body: unknown,
-  ): Promise<unknown> {
+  private async postFlowAction(paymentId: string, action: string, body: unknown): Promise<unknown> {
     const token = await this.auth.clientCredentials(PAYMENTS_SCOPES, "payments");
     return jsonRequest(this.config, {
       method: "POST",
@@ -285,10 +312,7 @@ export class PaymentsClient {
     if (!this.signer) throw TruelayerError.signingRequired();
   }
 
-  private buildHeaders(
-    accessToken: string,
-    idemKey: string,
-  ): Record<string, string> {
+  private buildHeaders(accessToken: string, idemKey: string): Record<string, string> {
     return {
       Authorization: `Bearer ${accessToken}`,
       "Idempotency-Key": idemKey,

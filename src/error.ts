@@ -83,9 +83,7 @@ export class TruelayerError extends Error {
       shouldRetry: headers.get("tl-should-retry") === "true",
       title: typeof body["title"] === "string" ? body["title"] : undefined,
       detail: typeof body["detail"] === "string" ? body["detail"] : undefined,
-      errors: Array.isArray(body["errors"])
-        ? (body["errors"] as FieldError[])
-        : undefined,
+      errors: Array.isArray(body["errors"]) ? (body["errors"] as FieldError[]) : undefined,
     });
   }
 
@@ -102,8 +100,7 @@ export class TruelayerError extends Error {
   static signingRequired(): TruelayerError {
     return new TruelayerError({
       type: "signing_required",
-      message:
-        "Request signing is required. Configure signingKeyPem and signingKeyId.",
+      message: "Request signing is required. Configure signingKeyPem and signingKeyId.",
     });
   }
 
