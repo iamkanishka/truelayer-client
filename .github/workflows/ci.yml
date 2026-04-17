@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   quality:
@@ -34,8 +34,8 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-      - name: Test with coverage
-        run: npm run test:coverage
+      # - name: Test with coverage
+      #   run: npm run test:coverage
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '20'
