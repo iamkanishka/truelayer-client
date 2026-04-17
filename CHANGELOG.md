@@ -4,7 +4,7 @@
 
 ### Added
 
-- `TruelayerClient.create()` — async factory with Web Crypto key import
+- `TruelayerBankClient.create()` — async factory with Web Crypto key import
 - `TruelayerError` — rich structured error class with predicates (`isRetryable`, `isNotFound`, etc.)
 - `AuthClient` — auth links, code exchange, client credentials, token refresh, `validToken()`
 - `MemoryTokenStore` — in-memory token store; interface for Redis/DynamoDB backends
